@@ -144,7 +144,7 @@ canvas.addEventListener('mousedown', (event) => {
     const mouseY = event.clientY - rect.top;
 
     if (pressedKeys.has("c")) {
-        const x = Math.rccccccccound(mouseX / pixelSize);
+        const x = Math.round(mouseX / pixelSize);
         const d = Math.round((canvas.height - mouseY) / pixelSize);
         let i = stage.roadPoint.findIndex((p) => p.d >= d);
         if (stage.roadPoint[i].d == d) return;
