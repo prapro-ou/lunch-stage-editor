@@ -5,13 +5,11 @@
     <title>道編集ツール</title>
     <style>
         #canvas-container {
-            position: relative;
-        }
-        #roadCanvas {
-            border: 1px solid black;
+            text-align: center;
         }
         .control-panel {
             margin-top: 10px;
+            text-align: center;
         }
         #screen {
             background-color: rgb(177, 200, 197);
@@ -19,12 +17,12 @@
     </style>
 </head>
 <body>
-    <p>
-        薄緑丸を引っ張って道路の形状を編集<br>
-        dを押しながら薄緑丸を押すと削除<br>
-        cを押しながら道路を押すと新規薄緑丸を作成
-    </p>
     <div class="control-panel">
+        <p>
+            薄緑丸を引っ張って道路の形状を編集<br>
+            dを押しながら薄緑丸を押すと削除<br>
+            cを押しながら道路を押すと新規薄緑丸を作成
+        </p>
         <label for="roadWidth">道の幅:</label>
         <input type="number" id="roadWidth" value="320" step="10">
         <label for="goalDistance">ゴールの距離:</label>
