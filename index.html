@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>道編集ツール</title>
+    <style>
+        #canvas-container {
+            position: relative;
+        }
+        #roadCanvas {
+            border: 1px solid black;
+        }
+        .control-panel {
+            margin-top: 10px;
+        }
+        #screen {
+            background-color: rgb(177, 200, 197);
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <label for="roadWidth">道の幅:</label>
+        <input type="number" id="roadWidth" value="320" step="10">
+        <label for="goalDistance">ゴールの距離:</label>
+        <input type="number" id="goalDistance" value="1500" step="50">
+        <button id="updateStage">更新</button>
+        <button id="copyStage">コピー</button>
+    </div>
+    <div id="canvas-container">
+        <canvas id="screen" width="800" height="600"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
