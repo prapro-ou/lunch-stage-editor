@@ -4,12 +4,28 @@
     <meta charset="UTF-8">
     <title>道編集ツール</title>
     <style>
-        #canvas-container {
-            text-align: center;
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        p {
+            line-height: 3px;
         }
         .control-panel {
-            margin-top: 10px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
             text-align: center;
+            z-index: 1000;
+        }
+        #canvas-container {
+            text-align: center;
+            margin-top: 80px; /* This should be enough to push the canvas down */
         }
         #screen {
             background-color: rgb(177, 200, 197);
@@ -19,9 +35,10 @@
 <body>
     <div class="control-panel">
         <p>
-            薄緑丸を引っ張って道路の形状を編集<br>
-            dを押しながら薄緑丸を押すと削除<br>
-            cを押しながら道路を押すと新規薄緑丸を作成
+            ドラッグで移動　dで削除　cで新規作成 数字キーで切り替え
+        </p>
+        <p id="mode">
+            モード【道】
         </p>
         <label for="roadWidth">道の幅:</label>
         <input type="number" id="roadWidth" value="320" step="10">

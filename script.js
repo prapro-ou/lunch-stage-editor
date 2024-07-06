@@ -1,5 +1,5 @@
 const obstacleType = {
-    mud: "obstacleType-mud"
+    mud: "obstacleType.mud"
 }
 
 let stage = {
@@ -26,12 +26,16 @@ let stage = {
     goalDistance: 1500
 }
 
+const mudImage = new Image();
+mudImage.src = 'image/mud.png';
+
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 const roadWidthInput = document.getElementById('roadWidth');
 const goalDistanceInput = document.getElementById('goalDistance');
 const updateStageButton = document.getElementById('updateStage');
 const copyStageButton = document.getElementById('copyStage');
+const modeLabel = document.getElementById('mode');
 
 const pixelSize = 3
 
@@ -104,10 +108,16 @@ function drawObstacle() {
     stage.obstacles.forEach(obstacle => {
         const y = canvas.height - obstacle.d * pixelSize;
         const x = obstacle.x * pixelSize;
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, Math.PI * 2, false);
-        ctx.fillStyle = 'brown';
-        ctx.fill();
+        const centerX = x - (mudImage.width / 2);
+        const centerY = y - (mudImage.height / 2);
+
+        if (mudImage.complete) {
+            ctx.drawImage(mudImage, centerX, centerY);
+        } else {
+            mudImage.onload = () => {
+                ctx.drawImage(mudImage, centerX, centerY);
+            };
+        }
     });
 }
 
@@ -126,12 +136,32 @@ copyStageButton.addEventListener('click', () => {
         let p = stage.roadPoint[i];
         s += `\n        {d: ${p.d}, x: ${p.x}},`;
     }
-    s += "\n    ],\n    obstacles: [],";
-    s += `\n    roadWidth: ${stage.roadWidth},`;
+    s += "\n    ],\n    obstacles: [";
+    for (let i = 0; i < stage.obstacles.length; i++) {
+        let p = stage.obstacles[i];
+        s += `\n        {type: ${p.type}, d: ${p.d}, x: ${p.x}},`;
+    }
+    s += `\n    ],\n    roadWidth: ${stage.roadWidth},`;
     s += `\n    goalDistance: ${stage.goalDistance},`;
     s += "\n}"
     navigator.clipboard.writeText(s);
 })
+
+function nearest(arr, x, y) {
+    let minDist = Infinity;
+    let near = null;
+    arr.forEach((point, index) => {
+        const pointX = point.x * pixelSize;
+        const pointY = canvas.height - point.d * pixelSize;
+        const dist = Math.hypot(x - pointX, y - pointY);
+        if (dist < minDist) {
+            minDist = dist;
+            near = index;
+        }
+    });
+    if (minDist > 10) return null;
+    return near;
+}
 
 // マウス操作のための変数
 let isDragging = false;
@@ -142,62 +172,78 @@ canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
+    const x = Math.round(mouseX / pixelSize);
+    const d = Math.round((canvas.height - mouseY) / pixelSize);
 
-    if (pressedKeys.has("c")) {
-        const x = Math.round(mouseX / pixelSize);
-        const d = Math.round((canvas.height - mouseY) / pixelSize);
-        let i = stage.roadPoint.findIndex((p) => p.d >= d);
-        if (stage.roadPoint[i].d == d) return;
-        stage.roadPoint.splice(i, 0, {d: d, x: x});
-    }
+    switch (mode) {
+        case modes.road:
+            if (pressedKeys.has("c")) {
+                let i = stage.roadPoint.findIndex((p) => p.d >= d);
+                if (stage.roadPoint[i].d == d) return;
+                stage.roadPoint.splice(i, 0, {d: d, x: x});
+            }
 
-    // クリックされた位置に最も近いroadPointを特定
-    let minDist = Infinity;
-    stage.roadPoint.forEach((point, index) => {
-        const pointX = point.x * pixelSize;
-        const pointY = canvas.height - point.d * pixelSize;
-        const dist = Math.hypot(mouseX - pointX, mouseY - pointY);
-        if (dist < minDist) {
-            minDist = dist;
-            selectedPoint = index;
-        }
-    });
+            selectedPoint = nearest(stage.roadPoint, mouseX, mouseY)
+            if (!selectedPoint && selectedPoint != 0) return;
 
-    // 距離が一定以下でないならreturn
-    if (minDist > 10) return;
+            if (pressedKeys.has("d")) {
+                stage.roadPoint.splice(selectedPoint, 1);
+                selectedPoint = null;
 
-    if (pressedKeys.has("d")) {
-        stage.roadPoint.splice(selectedPoint, 1);
-        selectedPoint = null;
+            } else {
+                isDragging = true;
+            }
+            break;
 
-    } else {
-        isDragging = true;
+        case modes.mud:
+            if (pressedKeys.has("c")) {
+                let i = stage.obstacles.findIndex((p) => p.d >= d);
+                if (i != -1 && stage.obstacles[i].d == d) return;
+                if (i == -1) i = 0;
+                stage.obstacles.splice(i, 0, {type: obstacleType.mud, d: d, x: x});
+            }
+
+            selectedPoint = nearest(stage.obstacles, mouseX, mouseY)
+            if (!selectedPoint && selectedPoint != 0) return;
+
+            if (pressedKeys.has("d")) {
+                stage.obstacles.splice(selectedPoint, 1);
+                selectedPoint = null;
+
+            } else {
+                isDragging = true;
+            }
+            break;
     }
 });
 
 canvas.addEventListener('mousemove', (event) => {
-    if (isDragging && selectedPoint !== null) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    if (!isDragging || !selectedPoint && selectedPoint != 0) return;
 
-        // 選択されたpointを更新
-        stage.roadPoint[selectedPoint].x = Math.round(mouseX / pixelSize);
-        if (selectedPoint != 0 && selectedPoint != stage.roadPoint.length - 1) {
-            stage.roadPoint[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
-        }
+    switch (mode) {
+        case modes.road:
+            stage.roadPoint[selectedPoint].x = Math.round(mouseX / pixelSize);
+            if (selectedPoint != 0 && selectedPoint != stage.roadPoint.length - 1) {
+                stage.roadPoint[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
+            }
+            break;
+
+        case modes.mud:
+            stage.obstacles[selectedPoint].x = Math.round(mouseX / pixelSize);
+            stage.obstacles[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
+            break;
     }
 });
 
-canvas.addEventListener('mouseup', () => {
+function mouseUpOrMouseOut() {
     isDragging = false;
     selectedPoint = null;
-});
-
-canvas.addEventListener('mouseout', () => {
-    isDragging = false;
-    selectedPoint = null;
-});
+}
+canvas.addEventListener('mouseup', mouseUpOrMouseOut);
+canvas.addEventListener('mouseout', mouseUpOrMouseOut);
 
 roadWidthInput.value = stage.roadWidth
 goalDistanceInput.value = stage.goalDistance
@@ -211,9 +257,25 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+const modes = {
+    road: "mode-road",
+    mud: "mode-mud",
+};
+let mode = modes.road;
+
 let pressedKeys = new Set();
 document.addEventListener("keydown", function(e) {
     pressedKeys.add(e.key)
+    switch (e.key) {
+        case "1":
+            mode = modes.road;
+            modeLabel.innerText = "モード【道】";
+            break;
+        case "2":
+            mode = modes.mud;
+            modeLabel.innerText = "モード【泥水】";
+            break;
+    }
 });
 document.addEventListener("keyup", function(e) {
     pressedKeys.delete(e.key)
