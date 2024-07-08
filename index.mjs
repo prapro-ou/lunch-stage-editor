@@ -5,6 +5,8 @@ stage.roadPoint.shift();
 
 const mudImage = new Image();
 mudImage.src = 'image/mud.png';
+const ingredientImage = new Image();
+ingredientImage.src = 'image/ingredient.png';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -24,6 +26,7 @@ function draw() {
     drawRoadInfo(100 * pixelSize);
     drawRoadPointer();
     drawObstacle();
+    drawIngredient();
 }
 
 function drawRoad(areaWidth) {
@@ -90,10 +93,19 @@ function drawObstacle() {
 
         if (mudImage.complete) {
             ctx.drawImage(mudImage, centerX, centerY);
-        } else {
-            mudImage.onload = () => {
-                ctx.drawImage(mudImage, centerX, centerY);
-            };
+        }
+    });
+}
+
+function drawIngredient() {
+    stage.ingredients.forEach(ingredient => {
+        const y = canvas.height - ingredient.d * pixelSize;
+        const x = ingredient.x * pixelSize;
+        const centerX = x - (ingredientImage.width / 2);
+        const centerY = y - (ingredientImage.height / 2);
+
+        if (ingredientImage.complete) {
+            ctx.drawImage(ingredientImage, centerX, centerY);
         }
     });
 }
@@ -117,6 +129,11 @@ copyStageButton.addEventListener('click', () => {
     for (let i = 0; i < stage.obstacles.length; i++) {
         let p = stage.obstacles[i];
         s += `\n        {type: ${p.type}, d: ${p.d}, x: ${p.x}},`;
+    }
+    s += "\n    ],\n    ingredients: [";
+    for (let i = 0; i < stage.ingredients.length; i++) {
+        let p = stage.ingredients[i];
+        s += `\n        {d: ${p.d}, x: ${p.x}},`;
     }
     s += `\n    ],\n    roadWidth: ${stage.roadWidth},`;
     s += `\n    goalDistance: ${stage.goalDistance},`;
@@ -191,6 +208,26 @@ canvas.addEventListener('mousedown', (event) => {
                 isDragging = true;
             }
             break;
+
+        case modes.ingredient:
+            if (pressedKeys.has("c")) {
+                let i = stage.ingredients.findIndex((p) => p.d >= d);
+                if (i != -1 && stage.ingredients[i].d == d) return;
+                if (i == -1) i = 0;
+                stage.ingredients.splice(i, 0, {d: d, x: x});
+            }
+
+            selectedPoint = nearest(stage.ingredients, mouseX, mouseY)
+            if (!selectedPoint && selectedPoint != 0) return;
+
+            if (pressedKeys.has("d")) {
+                stage.ingredients.splice(selectedPoint, 1);
+                selectedPoint = null;
+
+            } else {
+                isDragging = true;
+            }
+            break;
     }
 });
 
@@ -211,6 +248,11 @@ canvas.addEventListener('mousemove', (event) => {
         case modes.mud:
             stage.obstacles[selectedPoint].x = Math.round(mouseX / pixelSize);
             stage.obstacles[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
+            break;
+
+        case modes.ingredient:
+            stage.ingredients[selectedPoint].x = Math.round(mouseX / pixelSize);
+            stage.ingredients[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
             break;
     }
 });
@@ -237,6 +279,7 @@ function gameLoop() {
 const modes = {
     road: "mode-road",
     mud: "mode-mud",
+    ingredient: "mode-ingredient",
 };
 let mode = modes.road;
 
@@ -251,6 +294,10 @@ document.addEventListener("keydown", function(e) {
         case "2":
             mode = modes.mud;
             modeLabel.innerText = "モード【泥水】";
+            break;
+        case "3":
+            mode = modes.ingredient;
+            modeLabel.innerText = "モード【食材】";
             break;
     }
 });
