@@ -2,6 +2,7 @@ export const stage =
 
 {
     roadPoint: [
+        {d: -50, x: 22},
         {d: 0, x: 22}, // dは上方向(yとは逆の向き)
         {d: 150, x: 22},
         {d: 250, x: 42},

@@ -1,6 +1,8 @@
 import { obstacleType } from "./enum.mjs";
 import { stage } from "./stage.mjs";
 
+stage.roadPoint.shift();
+
 const mudImage = new Image();
 mudImage.src = 'image/mud.png';
 
@@ -106,7 +108,7 @@ updateStageButton.addEventListener('click', () => {
 });
 
 copyStageButton.addEventListener('click', () => {
-    let s = "{\n    roadPoint: [";
+    let s = `{\n    roadPoint: [\n        {d: -50, x: ${stage.roadPoint[0].x}},`;
     for (let i = 0; i < stage.roadPoint.length; i++) {
         let p = stage.roadPoint[i];
         s += `\n        {d: ${p.d}, x: ${p.x}},`;
