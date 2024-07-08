@@ -30,24 +30,55 @@ function draw() {
 }
 
 function drawRoad(areaWidth) {
+    const [max_x, max_y] = [areaWidth, canvas.height];
     let i = 0;
+    const whiteLineSpacing = 10;
+    let goalSquareSize = 1.7;
     for (let d = 0; d <= stage.goalDistance; d++) {
-        while (stage.roadPoint[i+1].d < d) { i += 1; }
-        const r = (d - stage.roadPoint[i].d) / (stage.roadPoint[i+1].d - stage.roadPoint[i].d);
-        const center = stage.roadPoint[i+1].x * r + stage.roadPoint[i].x * (1-r);
-        const roadLeft = Math.round(center - stage.roadWidth / 2);
-        const roadRight = Math.round(center + stage.roadWidth / 2);
-        for (let x = 0; x < areaWidth / pixelSize + 1; x++) {
-            if (x >= roadLeft && x <= roadRight) {
-                ctx.fillStyle = "gray";
-            } else if (x == roadLeft - 1 || x == roadRight + 1) {
-                ctx.fillStyle = "black";
-            } else {
-                ctx.fillStyle = "green";
+        const { center, left, right } = roadX(d);
+        // 道路の外側
+        ctx.fillStyle = "green";
+        ctx.fillRect(0, max_y - (d * pixelSize), max_x, pixelSize);
+        // 道路の内側
+        ctx.fillStyle = "gray";
+        ctx.fillRect(left * pixelSize, max_y - (d * pixelSize), (right - left) * pixelSize, pixelSize);
+        // 白線
+        if (d % (whiteLineSpacing * 2) < whiteLineSpacing) {
+            ctx.fillStyle = "white";
+            const roadCenter = Math.round(center * 3) / 3;
+            ctx.fillRect(roadCenter * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
+        }
+        // 道路の境界
+        ctx.fillStyle = "black";
+        ctx.fillRect((left - 1) * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
+        ctx.fillRect(right * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
+        // ゴール線
+        const gd = Math.round(d) - (stage.goalDistance - 4)
+        if (gd >= 0 && gd < 3) {
+            goalSquareSize = (right - left) / Math.floor((right - left) / goalSquareSize);
+            let i = 0;
+            for (let x = left; x < right; x += goalSquareSize) {
+                i += 1;
+                ctx.fillStyle = ((i + gd) % 2 == 0) ? "black" : "white";
+                ctx.fillRect(
+                    x * pixelSize,
+                    max_y - (d * pixelSize),
+                    goalSquareSize * pixelSize,
+                    pixelSize
+                );
             }
-            ctx.fillRect(x * pixelSize, canvas.height - (d * pixelSize), pixelSize, pixelSize);
         }
     }
+}
+
+function roadX(d) {
+    let i = 0;
+    while (stage.roadPoint[i+1].d < d) { i += 1; }
+    const r = (d - stage.roadPoint[i].d) / (stage.roadPoint[i+1].d - stage.roadPoint[i].d);
+    const center = stage.roadPoint[i+1].x * r + stage.roadPoint[i].x * (1-r);
+    const left = center - stage.roadWidth / 2;
+    const right = center + stage.roadWidth / 2;
+    return { center: center, left: left, right: right };
 }
 
 function drawRoadInfo(areaX) {
@@ -88,11 +119,17 @@ function drawObstacle() {
     stage.obstacles.forEach(obstacle => {
         const y = canvas.height - obstacle.d * pixelSize;
         const x = obstacle.x * pixelSize;
-        const centerX = x - (mudImage.width / 2);
-        const centerY = y - (mudImage.height / 2);
+        const scaleFactor = 1.5 / 8 * pixelSize;
 
         if (mudImage.complete) {
-            ctx.drawImage(mudImage, centerX, centerY);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(
+                mudImage,
+                x - mudImage.width * scaleFactor / 2,
+                y - mudImage.height * scaleFactor / 2,
+                mudImage.width * scaleFactor,
+                mudImage.height * scaleFactor,
+            );
         }
     });
 }
@@ -101,11 +138,17 @@ function drawIngredient() {
     stage.ingredients.forEach(ingredient => {
         const y = canvas.height - ingredient.d * pixelSize;
         const x = ingredient.x * pixelSize;
-        const centerX = x - (ingredientImage.width / 2);
-        const centerY = y - (ingredientImage.height / 2);
+        const scaleFactor = 2 / 8 * pixelSize;
 
         if (ingredientImage.complete) {
-            ctx.drawImage(ingredientImage, centerX, centerY);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(
+                ingredientImage,
+                x - ingredientImage.width * scaleFactor / 2,
+                y - ingredientImage.height * scaleFactor / 2,
+                ingredientImage.width * scaleFactor,
+                ingredientImage.height * scaleFactor,
+            );
         }
     });
 }
