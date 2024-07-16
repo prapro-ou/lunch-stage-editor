@@ -1,4 +1,4 @@
-import { obstacleType } from "./enum.mjs";
+import { obstacleType, objectTypes } from "./enum.mjs";
 import { stage } from "./stage.mjs";
 import { RoadView } from "./RoadView.mjs";
 import { InfoView } from "./InfoView.mjs";
@@ -45,22 +45,6 @@ copyStageButton.addEventListener('click', () => {
     navigator.clipboard.writeText(json);
 })
 
-function nearest(arr, x, y) {
-    let minDist = Infinity;
-    let near = null;
-    arr.forEach((point, index) => {
-        const pointX = point.x * pixelSize;
-        const pointY = canvas.height - point.d * pixelSize;
-        const dist = Math.hypot(x - pointX, y - pointY);
-        if (dist < minDist) {
-            minDist = dist;
-            near = index;
-        }
-    });
-    if (minDist > 10) return null;
-    return near;
-}
-
 // マウス操作のための変数
 let isDragging = false;
 let selectedPoint = null;
@@ -70,68 +54,20 @@ canvas.addEventListener('mousedown', (event) => {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    const x = Math.round(mouseX / pixelSize);
-    const d = Math.round((canvas.height - mouseY) / pixelSize);
+    const { x, d } = roadView.getMousePointXD(mouseX, mouseY);
 
-    switch (mode) {
-        case modes.road:
-            if (pressedKeys.has("c")) {
-                let i = stage.roadPoint.findIndex((p) => p.d >= d);
-                if (stage.roadPoint[i].d == d) return;
-                stage.roadPoint.splice(i, 0, {d: d, x: x});
-            }
+    if (pressedKeys.has("c")) {
+        stageHandler.createObject(objectTypeFor[mode], x, d);
+    }
 
-            selectedPoint = nearest(stage.roadPoint, mouseX, mouseY)
-            if (!selectedPoint && selectedPoint != 0) return;
+    selectedPoint = stageHandler.objectPointNear(objectTypeFor[mode], x, d);
+    if (!selectedPoint && selectedPoint != 0) return;
 
-            if (pressedKeys.has("d")) {
-                stage.roadPoint.splice(selectedPoint, 1);
-                selectedPoint = null;
-
-            } else {
-                isDragging = true;
-            }
-            break;
-
-        case modes.mud:
-            if (pressedKeys.has("c")) {
-                let i = stage.obstacles.findIndex((p) => p.d >= d);
-                if (i != -1 && stage.obstacles[i].d == d) return;
-                if (i == -1) i = 0;
-                stage.obstacles.splice(i, 0, {type: obstacleType.mud, d: d, x: x});
-            }
-
-            selectedPoint = nearest(stage.obstacles, mouseX, mouseY)
-            if (!selectedPoint && selectedPoint != 0) return;
-
-            if (pressedKeys.has("d")) {
-                stage.obstacles.splice(selectedPoint, 1);
-                selectedPoint = null;
-
-            } else {
-                isDragging = true;
-            }
-            break;
-
-        case modes.ingredient:
-            if (pressedKeys.has("c")) {
-                let i = stage.ingredients.findIndex((p) => p.d >= d);
-                if (i != -1 && stage.ingredients[i].d == d) return;
-                if (i == -1) i = 0;
-                stage.ingredients.splice(i, 0, {d: d, x: x});
-            }
-
-            selectedPoint = nearest(stage.ingredients, mouseX, mouseY)
-            if (!selectedPoint && selectedPoint != 0) return;
-
-            if (pressedKeys.has("d")) {
-                stage.ingredients.splice(selectedPoint, 1);
-                selectedPoint = null;
-
-            } else {
-                isDragging = true;
-            }
-            break;
+    if (pressedKeys.has("d")) {
+        stageHandler.deleteObject(objectTypeFor[mode], selectedPoint);
+        selectedPoint = null;
+    } else {
+        isDragging = true;
     }
 });
 
@@ -186,6 +122,12 @@ const modes = {
     ingredient: "mode-ingredient",
 };
 let mode = modes.road;
+
+const objectTypeFor = {
+    [modes.road]: objectTypes.road,
+    [modes.mud]: objectTypes.mud,
+    [modes.ingredient]: objectTypes.ingredient,
+};
 
 let pressedKeys = new Set();
 document.addEventListener("keydown", function(e) {

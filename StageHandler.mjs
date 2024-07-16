@@ -1,3 +1,5 @@
+import { obstacleType, objectTypes } from "./enum.mjs";
+
 // ステージに対する操作などをカプセル化
 export class StageHandler {
     constructor(stage) {
@@ -35,5 +37,57 @@ export class StageHandler {
         const lastPointX = this.stage.roadPoint[this.stage.roadPoint.length-1].x;
         this.stage.roadPoint = this.stage.roadPoint.filter((p) => p.d < this.stage.goalDistance);
         this.stage.roadPoint.push({x: lastPointX, d: this.stage.goalDistance});
+    }
+
+    getArrayIncluding(objectType) {
+        switch (objectType) {
+            case objectTypes.road:
+                return this.stage.roadPoint;
+
+            case objectTypes.mud:
+                return this.stage.obstacles;
+
+            case objectTypes.ingredient:
+                return this.stage.ingredients;
+
+            default:
+                console.error(`${objectType}の配列は定義されていません。`);
+        }
+    }
+
+    createObject(objectType, x, d) {
+        const array = this.getArrayIncluding(objectType);
+        let i = array.findIndex((p) => p.d >= d);
+        if (i != -1 && array[i].d == d) return;
+        if (i == -1) i = 0;
+        switch (objectType) {
+            case objectTypes.road:
+                array.splice(i, 0, {d: d, x: x});
+                break;
+
+            case objectTypes.mud:
+                array.splice(i, 0, {type: obstacleType.mud, d: d, x: x});
+                break;
+
+            case objectTypes.ingredient:
+                array.splice(i, 0, {d: d, x: x});
+                break;
+
+            default:
+                console.error(`${objectType}の追加方法は定義されていません。`);
+        }
+    }
+
+    deleteObject(objectType, index) {
+        this.getArrayIncluding(objectType).splice(index, 1);
+    }
+
+    objectPointNear(objectType, x, d) {
+        let [minDist, near] = [Infinity, null];
+        this.getArrayIncluding(objectType).forEach((point, index) => {
+            const dist = Math.hypot(point.x - x, point.d - d);
+            if (dist < minDist) [minDist, near] = [dist, index];
+        });
+        return minDist > 5 ? null : near;
     }
 }

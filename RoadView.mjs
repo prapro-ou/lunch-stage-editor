@@ -116,4 +116,11 @@ export class RoadView {
             this.ctx.fill();
         }
     }
+
+    getMousePointXD(mouseX, mouseY) {
+        return {
+            x: mouseX / this.pixelSize,
+            d: (this.height - mouseY) / this.pixelSize
+        }
+    }
 }
