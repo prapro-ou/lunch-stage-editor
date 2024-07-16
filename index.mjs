@@ -16,15 +16,16 @@ const modeLabel = document.getElementById('mode');
 const pixelSize = 3
 
 const roadView = new RoadView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
-const infoView = new InfoView(ctx, stage, pixelSize);
+const infoView = new InfoView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
 
 function draw() {
     canvas.width = 100 * pixelSize + 200
     canvas.height = stage.goalDistance * pixelSize
     roadView.updateSize(100 * pixelSize, canvas.height);
+    infoView.updateSize(100 * pixelSize, canvas.height);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     roadView.drawRoad();
-    infoView.drawRoadInfo(100 * pixelSize, canvas.height);
+    infoView.drawRoadInfo();
     drawRoadPointer();
     roadView.drawObstacle();
     roadView.drawIngredient();
