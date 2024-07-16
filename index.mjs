@@ -1,4 +1,4 @@
-import { obstacleType, objectTypes } from "./enum.mjs";
+import { objectTypes } from "./enum.mjs";
 import { stage } from "./stage.mjs";
 import { RoadView } from "./RoadView.mjs";
 import { InfoView } from "./InfoView.mjs";
@@ -19,6 +19,44 @@ const pixelSize = 3
 const roadView = new RoadView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
 const infoView = new InfoView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
 const stageHandler = new StageHandler(stage)
+
+// 操作に関する変数
+let isDragging = false;
+let selectedPoint = null;
+let pressedKeys = new Set();
+
+// モード
+const modes = {
+    road: "mode-road",
+    mud: "mode-mud",
+    ingredient: "mode-ingredient",
+};
+let mode = modes.road;
+
+const objectTypeFor = {
+    [modes.road]: objectTypes.road,
+    [modes.mud]: objectTypes.mud,
+    [modes.ingredient]: objectTypes.ingredient,
+};
+
+// DOM要素の初期化
+roadWidthInput.value = stage.roadWidth
+goalDistanceInput.value = stage.goalDistance
+
+// ゲームループ
+function gameLoop() {
+    flame_limitter_count += 1
+    if (flame_limitter_count == flame_limitter) {
+        flame_limitter_count = 0
+        draw();
+    }
+    requestAnimationFrame(gameLoop);
+}
+const flame_limitter = 4;
+let flame_limitter_count = 0;
+requestAnimationFrame(gameLoop);
+
+// ==== 以下、関数宣言とイベントハンドラーの登録 ====
 
 function draw() {
     canvas.width = 100 * pixelSize + 200
@@ -44,10 +82,6 @@ copyStageButton.addEventListener('click', () => {
     const json = stageHandler.convertToJSON();
     navigator.clipboard.writeText(json);
 })
-
-// マウス操作のための変数
-let isDragging = false;
-let selectedPoint = null;
 
 // クリックイベントのリスナーを追加
 canvas.addEventListener('mousedown', (event) => {
@@ -87,32 +121,6 @@ function mouseUpOrMouseOut() {
 canvas.addEventListener('mouseup', mouseUpOrMouseOut);
 canvas.addEventListener('mouseout', mouseUpOrMouseOut);
 
-roadWidthInput.value = stage.roadWidth
-goalDistanceInput.value = stage.goalDistance
-
-function gameLoop() {
-    flame_limitter_count += 1
-    if (flame_limitter_count == flame_limitter) {
-        flame_limitter_count = 0
-        draw();
-    }
-    requestAnimationFrame(gameLoop);
-}
-
-const modes = {
-    road: "mode-road",
-    mud: "mode-mud",
-    ingredient: "mode-ingredient",
-};
-let mode = modes.road;
-
-const objectTypeFor = {
-    [modes.road]: objectTypes.road,
-    [modes.mud]: objectTypes.mud,
-    [modes.ingredient]: objectTypes.ingredient,
-};
-
-let pressedKeys = new Set();
 document.addEventListener("keydown", function(e) {
     pressedKeys.add(e.key)
     switch (e.key) {
@@ -134,6 +142,3 @@ document.addEventListener("keyup", function(e) {
     pressedKeys.delete(e.key)
 });
 
-const flame_limitter = 4;
-let flame_limitter_count = 0;
-requestAnimationFrame(gameLoop);
