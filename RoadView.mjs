@@ -1,6 +1,6 @@
 
 // DriveSceneでの描画を再現するクラス
-export class View {
+export class RoadView {
     constructor(ctx, stage, pixelSize) {
         this.ctx = ctx;
         this.stage = stage;

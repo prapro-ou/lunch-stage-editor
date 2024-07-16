@@ -1,6 +1,7 @@
 import { obstacleType } from "./enum.mjs";
 import { stage } from "./stage.mjs";
-import { View } from "./view.mjs";
+import { RoadView } from "./RoadView.mjs";
+import { InfoView } from "./InfoView.mjs";
 
 stage.roadPoint.shift();
 
@@ -19,39 +20,18 @@ const modeLabel = document.getElementById('mode');
 
 const pixelSize = 3
 
-const view = new View(ctx, stage, pixelSize);
+const roadView = new RoadView(ctx, stage, pixelSize);
+const infoView = new InfoView(ctx, stage, pixelSize);
 
 function draw() {
     canvas.width = 100 * pixelSize + 200
     canvas.height = stage.goalDistance * pixelSize
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    view.drawRoad(100 * pixelSize, canvas.height);
-    drawRoadInfo(100 * pixelSize);
+    roadView.drawRoad(100 * pixelSize, canvas.height);
+    infoView.drawRoadInfo(100 * pixelSize, canvas.height);
     drawRoadPointer();
     drawObstacle();
     drawIngredient();
-}
-
-function drawRoadInfo(areaX) {
-    for (let i = 0; i < stage.roadPoint.length; i++) {
-        const p = stage.roadPoint[i];
-        const content = `d=${p.d}, x=${p.x}`;
-        const y = p.d - 4*(i == stage.roadPoint.length - 1);
-        ctx.fillStyle = "black";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(content, areaX + 10, canvas.height - y * pixelSize);
-    }
-    for (let i = 0; i < stage.roadPoint.length - 1; i++) {
-        const p0 = stage.roadPoint[i];
-        const p1 = stage.roadPoint[i+1];
-        const content = `傾斜 ${(100 * (p1.x - p0.x) / (p1.d - p0.d)).toFixed(2)}%`;
-        const y = (p1.d + p0.d) / 2;
-        ctx.fillStyle = "black";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(content, areaX + 10, canvas.height - y * pixelSize);
-    }
 }
 
 function drawRoadPointer() {
