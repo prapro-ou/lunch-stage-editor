@@ -5,11 +5,6 @@ import { InfoView } from "./InfoView.mjs";
 
 stage.roadPoint.shift();
 
-const mudImage = new Image();
-mudImage.src = 'image/mud.png';
-const ingredientImage = new Image();
-ingredientImage.src = 'image/ingredient.png';
-
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 const roadWidthInput = document.getElementById('roadWidth');
@@ -20,18 +15,19 @@ const modeLabel = document.getElementById('mode');
 
 const pixelSize = 3
 
-const roadView = new RoadView(ctx, stage, pixelSize);
+const roadView = new RoadView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
 const infoView = new InfoView(ctx, stage, pixelSize);
 
 function draw() {
     canvas.width = 100 * pixelSize + 200
     canvas.height = stage.goalDistance * pixelSize
+    roadView.updateSize(100 * pixelSize, canvas.height);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    roadView.drawRoad(100 * pixelSize, canvas.height);
+    roadView.drawRoad();
     infoView.drawRoadInfo(100 * pixelSize, canvas.height);
     drawRoadPointer();
-    drawObstacle();
-    drawIngredient();
+    roadView.drawObstacle();
+    roadView.drawIngredient();
 }
 
 function drawRoadPointer() {
@@ -44,44 +40,6 @@ function drawRoadPointer() {
         ctx.fillStyle = 'lightgreen';
         ctx.fill();
     }
-}
-
-function drawObstacle() {
-    stage.obstacles.forEach(obstacle => {
-        const y = canvas.height - obstacle.d * pixelSize;
-        const x = obstacle.x * pixelSize;
-        const scaleFactor = 1.5 / 8 * pixelSize;
-
-        if (mudImage.complete) {
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(
-                mudImage,
-                x - mudImage.width * scaleFactor / 2,
-                y - mudImage.height * scaleFactor / 2,
-                mudImage.width * scaleFactor,
-                mudImage.height * scaleFactor,
-            );
-        }
-    });
-}
-
-function drawIngredient() {
-    stage.ingredients.forEach(ingredient => {
-        const y = canvas.height - ingredient.d * pixelSize;
-        const x = ingredient.x * pixelSize;
-        const scaleFactor = 2 / 8 * pixelSize;
-
-        if (ingredientImage.complete) {
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(
-                ingredientImage,
-                x - ingredientImage.width * scaleFactor / 2,
-                y - ingredientImage.height * scaleFactor / 2,
-                ingredientImage.width * scaleFactor,
-                ingredientImage.height * scaleFactor,
-            );
-        }
-    });
 }
 
 updateStageButton.addEventListener('click', () => {

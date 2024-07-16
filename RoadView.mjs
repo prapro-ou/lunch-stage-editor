@@ -1,15 +1,25 @@
 
 // DriveSceneでの描画を再現するクラス
 export class RoadView {
-    constructor(ctx, stage, pixelSize) {
+    constructor(ctx, stage, pixelSize, width, height) {
         this.ctx = ctx;
         this.stage = stage;
-        this.pixelSize = pixelSize
+        this.pixelSize = pixelSize;
+        this.width = width;
+        this.height = height;
+        this.mudImage = new Image();
+        this.mudImage.src = 'image/mud.png';
+        this.ingredientImage = new Image();
+        this.ingredientImage.src = 'image/ingredient.png';
     }
 
-    drawRoad(width, height) {
-        const [max_x, max_y] = [width, height];
-        let i = 0;
+    updateSize(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    drawRoad() {
+        const [max_x, max_y] = [this.width, this.height];
         const whiteLineSpacing = 10;
         let goalSquareSize = 1.7;
         for (let d = 0; d <= this.stage.goalDistance; d++) {
@@ -57,5 +67,41 @@ export class RoadView {
         const left = center - this.stage.roadWidth / 2;
         const right = center + this.stage.roadWidth / 2;
         return { center: center, left: left, right: right };
+    }
+
+    drawObstacle() {
+        this.stage.obstacles.forEach(obstacle => {
+            const y = this.height - obstacle.d * this.pixelSize;
+            const x = obstacle.x * this.pixelSize;
+            const scaleFactor = 1.5 / 8 * this.pixelSize;
+            if (this.mudImage.complete) {
+                this.ctx.imageSmoothingEnabled = false;
+                this.ctx.drawImage(
+                    this.mudImage,
+                    x - this.mudImage.width * scaleFactor / 2,
+                    y - this.mudImage.height * scaleFactor / 2,
+                    this.mudImage.width * scaleFactor,
+                    this.mudImage.height * scaleFactor,
+                );
+            }
+        });
+    }
+
+    drawIngredient() {
+        this.stage.ingredients.forEach(ingredient => {
+            const y = this.height - ingredient.d * this.pixelSize;
+            const x = ingredient.x * this.pixelSize;
+            const scaleFactor = 2 / 8 * this.pixelSize;
+            if (this.ingredientImage.complete) {
+                this.ctx.imageSmoothingEnabled = false;
+                this.ctx.drawImage(
+                    this.ingredientImage,
+                    x - this.ingredientImage.width * scaleFactor / 2,
+                    y - this.ingredientImage.height * scaleFactor / 2,
+                    this.ingredientImage.width * scaleFactor,
+                    this.ingredientImage.height * scaleFactor,
+                );
+            }
+        });
     }
 }
