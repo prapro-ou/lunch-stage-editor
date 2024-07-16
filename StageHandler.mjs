@@ -25,4 +25,15 @@ export class StageHandler {
         json += "\n}"
         return json
     }
+
+    updateRoadWidth(roadWidth) {
+        this.stage.roadWidth = roadWidth;
+    }
+
+    updateGoalDistance(goalDistance) {
+        this.stage.goalDistance = goalDistance;
+        const lastPointX = this.stage.roadPoint[this.stage.roadPoint.length-1].x;
+        this.stage.roadPoint = this.stage.roadPoint.filter((p) => p.d < this.stage.goalDistance);
+        this.stage.roadPoint.push({x: lastPointX, d: this.stage.goalDistance});
+    }
 }

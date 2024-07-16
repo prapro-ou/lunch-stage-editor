@@ -34,12 +34,10 @@ function draw() {
 }
 
 updateStageButton.addEventListener('click', () => {
-    stage.roadWidth = parseFloat(roadWidthInput.value);
-    stage.goalDistance = parseFloat(goalDistanceInput.value);
-    const lastPointX = stage.roadPoint[stage.roadPoint.length-1].x;
-    stage.roadPoint = stage.roadPoint.filter((p) => p.d < stage.goalDistance);
-    stage.roadPoint.push({x: lastPointX, d: stage.goalDistance});
-    draw();
+    const roadWidth = parseFloat(roadWidthInput.value);
+    const goalDistance = parseFloat(goalDistanceInput.value);
+    stageHandler.updateRoadWidth(roadWidth);
+    stageHandler.updateGoalDistance(goalDistance);
 });
 
 copyStageButton.addEventListener('click', () => {
