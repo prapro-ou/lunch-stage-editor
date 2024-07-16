@@ -2,6 +2,7 @@ import { obstacleType } from "./enum.mjs";
 import { stage } from "./stage.mjs";
 import { RoadView } from "./RoadView.mjs";
 import { InfoView } from "./InfoView.mjs";
+import { StageHandler } from "./StageHandler.mjs";
 
 stage.roadPoint.shift();
 
@@ -17,6 +18,7 @@ const pixelSize = 3
 
 const roadView = new RoadView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
 const infoView = new InfoView(ctx, stage, pixelSize, 100 * pixelSize, canvas.height);
+const stageHandler = new StageHandler(stage)
 
 function draw() {
     canvas.width = 100 * pixelSize + 200
@@ -41,25 +43,8 @@ updateStageButton.addEventListener('click', () => {
 });
 
 copyStageButton.addEventListener('click', () => {
-    let s = `{\n    roadPoint: [\n        {d: -50, x: ${stage.roadPoint[0].x}},`;
-    for (let i = 0; i < stage.roadPoint.length; i++) {
-        let p = stage.roadPoint[i];
-        s += `\n        {d: ${p.d}, x: ${p.x}},`;
-    }
-    s += "\n    ],\n    obstacles: [";
-    for (let i = 0; i < stage.obstacles.length; i++) {
-        let p = stage.obstacles[i];
-        s += `\n        {type: ${p.type}, d: ${p.d}, x: ${p.x}},`;
-    }
-    s += "\n    ],\n    ingredients: [";
-    for (let i = 0; i < stage.ingredients.length; i++) {
-        let p = stage.ingredients[i];
-        s += `\n        {d: ${p.d}, x: ${p.x}},`;
-    }
-    s += `\n    ],\n    roadWidth: ${stage.roadWidth},`;
-    s += `\n    goalDistance: ${stage.goalDistance},`;
-    s += "\n}"
-    navigator.clipboard.writeText(s);
+    const json = stageHandler.convertToJSON();
+    navigator.clipboard.writeText(json);
 })
 
 function nearest(arr, x, y) {
