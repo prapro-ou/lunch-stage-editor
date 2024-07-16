@@ -1,5 +1,6 @@
 import { obstacleType } from "./enum.mjs";
 import { stage } from "./stage.mjs";
+import { View } from "./view.mjs";
 
 stage.roadPoint.shift();
 
@@ -18,67 +19,17 @@ const modeLabel = document.getElementById('mode');
 
 const pixelSize = 3
 
+const view = new View(ctx, stage, pixelSize);
+
 function draw() {
     canvas.width = 100 * pixelSize + 200
     canvas.height = stage.goalDistance * pixelSize
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawRoad(100 * pixelSize, canvas.height);
+    view.drawRoad(100 * pixelSize, canvas.height);
     drawRoadInfo(100 * pixelSize);
     drawRoadPointer();
     drawObstacle();
     drawIngredient();
-}
-
-function drawRoad(areaWidth) {
-    const [max_x, max_y] = [areaWidth, canvas.height];
-    let i = 0;
-    const whiteLineSpacing = 10;
-    let goalSquareSize = 1.7;
-    for (let d = 0; d <= stage.goalDistance; d++) {
-        const { center, left, right } = roadX(d);
-        // 道路の外側
-        ctx.fillStyle = "green";
-        ctx.fillRect(0, max_y - (d * pixelSize), max_x, pixelSize);
-        // 道路の内側
-        ctx.fillStyle = "gray";
-        ctx.fillRect(left * pixelSize, max_y - (d * pixelSize), (right - left) * pixelSize, pixelSize);
-        // 白線
-        if (d % (whiteLineSpacing * 2) < whiteLineSpacing) {
-            ctx.fillStyle = "white";
-            const roadCenter = Math.round(center * 3) / 3;
-            ctx.fillRect(roadCenter * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
-        }
-        // 道路の境界
-        ctx.fillStyle = "black";
-        ctx.fillRect((left - 1) * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
-        ctx.fillRect(right * pixelSize, max_y - (d * pixelSize), pixelSize, pixelSize);
-        // ゴール線
-        const gd = Math.round(d) - (stage.goalDistance - 4)
-        if (gd >= 0 && gd < 3) {
-            goalSquareSize = (right - left) / Math.floor((right - left) / goalSquareSize);
-            let i = 0;
-            for (let x = left; x < right; x += goalSquareSize) {
-                i += 1;
-                ctx.fillStyle = ((i + gd) % 2 == 0) ? "black" : "white";
-                ctx.fillRect(
-                    x * pixelSize,
-                    max_y - (d * pixelSize),
-                    goalSquareSize * pixelSize,
-                    pixelSize
-                );
-            }
-        }
-    }
-}
-
-function roadX(d) {
-    let i = 0;
-    while (stage.roadPoint[i+1].d < d) { i += 1; }
-    const r = (d - stage.roadPoint[i].d) / (stage.roadPoint[i+1].d - stage.roadPoint[i].d);
-    const center = stage.roadPoint[i+1].x * r + stage.roadPoint[i].x * (1-r);
-    const left = center - stage.roadWidth / 2;
-    const right = center + stage.roadWidth / 2;
-    return { center: center, left: left, right: right };
 }
 
 function drawRoadInfo(areaX) {
