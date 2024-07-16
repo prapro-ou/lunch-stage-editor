@@ -1,5 +1,4 @@
-
-// DriveSceneでの描画を再現するクラス
+// DriveSceneでの描画を再現して道路全体を描画するクラス
 export class RoadView {
     constructor(ctx, stage, pixelSize, width, height) {
         this.ctx = ctx;
@@ -103,5 +102,18 @@ export class RoadView {
                 );
             }
         });
+    }
+
+    // 道を編集する時の緑丸の描画
+    drawRoadPointer() {
+        for (let i = 0; i < this.stage.roadPoint.length; i++) {
+            const point = this.stage.roadPoint[i];
+            const y = this.height - point.d * this.pixelSize;
+            const x = point.x * this.pixelSize;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 5, 0, Math.PI * 2, false);
+            this.ctx.fillStyle = 'lightgreen';
+            this.ctx.fill();
+        }
     }
 }

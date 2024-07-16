@@ -26,21 +26,9 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     roadView.drawRoad();
     infoView.drawRoadInfo();
-    drawRoadPointer();
+    roadView.drawRoadPointer();
     roadView.drawObstacle();
     roadView.drawIngredient();
-}
-
-function drawRoadPointer() {
-    for (let i = 0; i < stage.roadPoint.length; i++) {
-        const point = stage.roadPoint[i];
-        const y = canvas.height - point.d * pixelSize;
-        const x = point.x * pixelSize;
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2, false);
-        ctx.fillStyle = 'lightgreen';
-        ctx.fill();
-    }
 }
 
 updateStageButton.addEventListener('click', () => {
