@@ -120,7 +120,7 @@ export class RoadView {
     getMousePointXD(mouseX, mouseY) {
         return {
             x: Math.round(mouseX / this.pixelSize),
-            d: Math.round((this.height - mouseY) / this.pixelSize)
+            d: Math.round((this.height - mouseY) / this.pixelSize),
         }
     }
 }

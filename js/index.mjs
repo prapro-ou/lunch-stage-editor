@@ -1,5 +1,5 @@
 import { objectTypes } from "./enum.mjs";
-import { stage } from "./stage.mjs";
+import { stage } from "../stage.mjs";
 import { RoadView } from "./RoadView.mjs";
 import { InfoView } from "./InfoView.mjs";
 import { StageHandler } from "./StageHandler.mjs";
