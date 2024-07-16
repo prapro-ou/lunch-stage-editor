@@ -24,6 +24,11 @@ export class StageHandler {
         }
         json += `\n    ],\n    roadWidth: ${this.stage.roadWidth},`;
         json += `\n    goalDistance: ${this.stage.goalDistance},`;
+        json += `\n    targetTime: ${this.stage.targetTime},`;
+        json += `\n    inertia: ${this.stage.inertia},`;
+        json += `\n    nightMode: ${this.stage.nightMode},`;
+        json += `\n    speedMode: ${this.stage.speedMode},`;
+        json += `\n    nCars: ${this.stage.nCars},`;
         json += "\n}"
         return json
     }
