@@ -82,6 +82,20 @@ export class StageHandler {
         this.getArrayIncluding(objectType).splice(index, 1);
     }
 
+    moveObject(objectType, index, x, d) {
+        const array = this.getArrayIncluding(objectType);
+        switch (objectType) {
+            case objectTypes.road:
+                array[index].x = x;
+                if (index != 0 && index != array.length - 1) array[index].d = d;
+                break;
+
+            default:
+                array[index].x = x;
+                array[index].d = d;
+        }
+    }
+
     objectPointNear(objectType, x, d) {
         let [minDist, near] = [Infinity, null];
         this.getArrayIncluding(objectType).forEach((point, index) => {

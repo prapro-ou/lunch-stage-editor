@@ -76,25 +76,8 @@ canvas.addEventListener('mousemove', (event) => {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
     if (!isDragging || !selectedPoint && selectedPoint != 0) return;
-
-    switch (mode) {
-        case modes.road:
-            stage.roadPoint[selectedPoint].x = Math.round(mouseX / pixelSize);
-            if (selectedPoint != 0 && selectedPoint != stage.roadPoint.length - 1) {
-                stage.roadPoint[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
-            }
-            break;
-
-        case modes.mud:
-            stage.obstacles[selectedPoint].x = Math.round(mouseX / pixelSize);
-            stage.obstacles[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
-            break;
-
-        case modes.ingredient:
-            stage.ingredients[selectedPoint].x = Math.round(mouseX / pixelSize);
-            stage.ingredients[selectedPoint].d = Math.round((canvas.height - mouseY) / pixelSize);
-            break;
-    }
+    const { x, d } = roadView.getMousePointXD(mouseX, mouseY);
+    stageHandler.moveObject(objectTypeFor[mode], selectedPoint, x, d)
 });
 
 function mouseUpOrMouseOut() {
