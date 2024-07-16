@@ -1,3 +1,5 @@
+import { obstacleType } from "./enum.mjs";
+
 // DriveSceneでの描画を再現して道路全体を描画するクラス
 export class RoadView {
     constructor(ctx, stage, pixelSize, width, height) {
@@ -6,10 +8,20 @@ export class RoadView {
         this.pixelSize = pixelSize;
         this.width = width;
         this.height = height;
+        this.loadImage()
+    }
+
+    loadImage() {
         this.mudImage = new Image();
         this.mudImage.src = 'image/mud.png';
         this.ingredientImage = new Image();
         this.ingredientImage.src = 'image/ingredient.png';
+        this.speedingBoardImage = new Image();
+        this.speedingBoardImage.src = 'image/speedingBoard.png';
+        this.imageForObstacle = {
+            [obstacleType.mud]: this.mudImage,
+            [obstacleType.speedingBoard]: this.speedingBoardImage
+        };
     }
 
     updateSize(width, height) {
@@ -73,14 +85,14 @@ export class RoadView {
             const y = this.height - obstacle.d * this.pixelSize;
             const x = obstacle.x * this.pixelSize;
             const scaleFactor = 1.5 / 8 * this.pixelSize;
-            if (this.mudImage.complete) {
+            if (this.imageForObstacle[obstacle.type].complete) {
                 this.ctx.imageSmoothingEnabled = false;
                 this.ctx.drawImage(
-                    this.mudImage,
-                    x - this.mudImage.width * scaleFactor / 2,
-                    y - this.mudImage.height * scaleFactor / 2,
-                    this.mudImage.width * scaleFactor,
-                    this.mudImage.height * scaleFactor,
+                    this.imageForObstacle[obstacle.type],
+                    x - this.imageForObstacle[obstacle.type].width * scaleFactor / 2,
+                    y - this.imageForObstacle[obstacle.type].height * scaleFactor / 2,
+                    this.imageForObstacle[obstacle.type].width * scaleFactor,
+                    this.imageForObstacle[obstacle.type].height * scaleFactor,
                 );
             }
         });
