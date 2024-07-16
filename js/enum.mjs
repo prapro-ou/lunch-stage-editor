@@ -3,6 +3,11 @@ export const obstacleType = {
     speedingBoard: "obstacleType.speedingBoard"
 }
 
+export const speedModes = {
+    normal: "speedModes.normal",
+    fast: "speedModes.fast",
+}
+
 export const objectTypes = {
     road: "objectType.road",
     mud: "objectType.mud",
