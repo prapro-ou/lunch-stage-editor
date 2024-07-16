@@ -45,6 +45,7 @@ export class StageHandler {
                 return this.stage.roadPoint;
 
             case objectTypes.mud:
+            case objectTypes.speedingBoard:
                 return this.stage.obstacles;
 
             case objectTypes.ingredient:
@@ -67,6 +68,10 @@ export class StageHandler {
 
             case objectTypes.mud:
                 array.splice(i, 0, {type: obstacleType.mud, d: d, x: x});
+                break;
+
+            case objectTypes.speedingBoard:
+                array.splice(i, 0, {type: obstacleType.speedingBoard, d: d, x: x});
                 break;
 
             case objectTypes.ingredient:

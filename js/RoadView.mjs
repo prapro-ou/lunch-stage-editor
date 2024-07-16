@@ -1,3 +1,5 @@
+import { obstacleType } from "./enum.mjs";
+
 // DriveSceneでの描画を再現して道路全体を描画するクラス
 export class RoadView {
     constructor(ctx, stage, pixelSize, width, height) {
@@ -6,10 +8,20 @@ export class RoadView {
         this.pixelSize = pixelSize;
         this.width = width;
         this.height = height;
+        this.loadImage()
+    }
+
+    loadImage() {
         this.mudImage = new Image();
         this.mudImage.src = 'image/mud.png';
         this.ingredientImage = new Image();
         this.ingredientImage.src = 'image/ingredient.png';
+        this.speedingBoardImage = new Image();
+        this.speedingBoardImage.src = 'image/speedingBoard.png';
+        this.imageForObstacle = {
+            [obstacleType.mud]: this.mudImage,
+            [obstacleType.speedingBoard]: this.speedingBoardImage
+        };
     }
 
     updateSize(width, height) {
@@ -18,27 +30,35 @@ export class RoadView {
     }
 
     drawRoad() {
-        const [max_x, max_y] = [this.width, this.height];
+        const [ctx, max_x, max_y] = [this.ctx, this.width, this.height];
+        this.cameraDistance = 0;
+        // 以降 DriveScene の drawRoad と同じ内容
+
         const whiteLineSpacing = 10;
+        const nWhiteLine = 2;
+        const whiteLineWidth = this.pixelSize * 0.8;
         let goalSquareSize = 1.7;
-        for (let d = 0; d <= this.stage.goalDistance; d++) {
-            const { center, left, right } = this.roadX(d);
+        for (let d = this.cameraDistance; d <= this.cameraDistance + Math.ceil(max_y / this.pixelSize); d++) {
+            const { left, right } = this.roadX(d);
             // 道路の外側
-            this.ctx.fillStyle = "green";
-            this.ctx.fillRect(0, max_y - (d * this.pixelSize), max_x, this.pixelSize);
+            ctx.fillStyle = "green";
+            ctx.fillRect(0, max_y - ((d - this.cameraDistance) * this.pixelSize), max_x, this.pixelSize);
             // 道路の内側
-            this.ctx.fillStyle = "gray";
-            this.ctx.fillRect(left * this.pixelSize, max_y - (d * this.pixelSize), (right - left) * this.pixelSize, this.pixelSize);
+            ctx.fillStyle = "gray";
+            ctx.fillRect(left * this.pixelSize, max_y - ((d - this.cameraDistance) * this.pixelSize), (right - left) * this.pixelSize, this.pixelSize);
             // 白線
             if (d % (whiteLineSpacing * 2) < whiteLineSpacing) {
-                this.ctx.fillStyle = "white";
-                const roadCenter = Math.round(center * 3) / 3;
-                this.ctx.fillRect(roadCenter * this.pixelSize, max_y - (d * this.pixelSize), this.pixelSize, this.pixelSize);
+                ctx.fillStyle = "white";
+                for (let i = 0; i < nWhiteLine; i++) {
+                    const ratio = (i + 1) / (nWhiteLine + 1)
+                    const x = left * (1 - ratio) + right * ratio
+                    ctx.fillRect(x * this.pixelSize - whiteLineWidth / 2, max_y - ((d - this.cameraDistance) * this.pixelSize), whiteLineWidth, this.pixelSize);
+                }
             }
             // 道路の境界
-            this.ctx.fillStyle = "black";
-            this.ctx.fillRect((left - 1) * this.pixelSize, max_y - (d * this.pixelSize), this.pixelSize, this.pixelSize);
-            this.ctx.fillRect(right * this.pixelSize, max_y - (d * this.pixelSize), this.pixelSize, this.pixelSize);
+            ctx.fillStyle = "black";
+            ctx.fillRect((left - 1) * this.pixelSize, max_y - ((d - this.cameraDistance) * this.pixelSize), this.pixelSize, this.pixelSize);
+            ctx.fillRect(right * this.pixelSize, max_y - ((d - this.cameraDistance) * this.pixelSize), this.pixelSize, this.pixelSize);
             // ゴール線
             const gd = Math.round(d) - (this.stage.goalDistance - 4)
             if (gd >= 0 && gd < 3) {
@@ -46,10 +66,10 @@ export class RoadView {
                 let i = 0;
                 for (let x = left; x < right; x += goalSquareSize) {
                     i += 1;
-                    this.ctx.fillStyle = ((i + gd) % 2 == 0) ? "black" : "white";
-                    this.ctx.fillRect(
+                    ctx.fillStyle = ((i + gd) % 2 == 0) ? "black" : "white";
+                    ctx.fillRect(
                         x * this.pixelSize,
-                        max_y - (d * this.pixelSize),
+                        max_y - ((d - this.cameraDistance) * this.pixelSize),
                         goalSquareSize * this.pixelSize,
                         this.pixelSize
                     );
@@ -73,14 +93,14 @@ export class RoadView {
             const y = this.height - obstacle.d * this.pixelSize;
             const x = obstacle.x * this.pixelSize;
             const scaleFactor = 1.5 / 8 * this.pixelSize;
-            if (this.mudImage.complete) {
+            if (this.imageForObstacle[obstacle.type].complete) {
                 this.ctx.imageSmoothingEnabled = false;
                 this.ctx.drawImage(
-                    this.mudImage,
-                    x - this.mudImage.width * scaleFactor / 2,
-                    y - this.mudImage.height * scaleFactor / 2,
-                    this.mudImage.width * scaleFactor,
-                    this.mudImage.height * scaleFactor,
+                    this.imageForObstacle[obstacle.type],
+                    x - this.imageForObstacle[obstacle.type].width * scaleFactor / 2,
+                    y - this.imageForObstacle[obstacle.type].height * scaleFactor / 2,
+                    this.imageForObstacle[obstacle.type].width * scaleFactor,
+                    this.imageForObstacle[obstacle.type].height * scaleFactor,
                 );
             }
         });

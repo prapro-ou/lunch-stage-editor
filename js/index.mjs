@@ -30,12 +30,14 @@ const modes = {
     road: "mode-road",
     mud: "mode-mud",
     ingredient: "mode-ingredient",
+    speedingBoard: "mode-speedingBoard"
 };
 let mode = modes.road;
 
 const objectTypeFor = {
     [modes.road]: objectTypes.road,
     [modes.mud]: objectTypes.mud,
+    [modes.speedingBoard]: objectTypes.speedingBoard,
     [modes.ingredient]: objectTypes.ingredient,
 };
 
@@ -135,6 +137,10 @@ document.addEventListener("keydown", function(e) {
         case "3":
             mode = modes.ingredient;
             modeLabel.innerText = "モード【食材】";
+            break;
+        case "4":
+            mode = modes.speedingBoard;
+            modeLabel.innerText = "モード【加速板】";
             break;
     }
 });
